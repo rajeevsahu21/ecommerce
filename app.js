@@ -4,13 +4,16 @@ import cors from "cors";
 import morgan from "morgan";
 import fs from "fs";
 import path from "path";
+import NodeCache from "node-cache";
 
 import dbConnect from "./config/dbConnect.js";
 import authRoutes from "./routes/auth.js";
+import productRoutes from "./routes/product.js";
 import authMiddleware from "./middleware/auth.js";
 import userRoutes from "./routes/user.js";
 
 const app = express();
+const nodeCache = new NodeCache();
 
 dbConnect();
 
@@ -39,8 +42,11 @@ app.get("/", (req, res) => {
 });
 
 app.use("/v1/auth", authRoutes);
+app.use("/v1/product", productRoutes);
 app.use(authMiddleware);
 app.use("/api/v1/user", userRoutes);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server Listening on port ${port}...`));
+
+export { nodeCache };

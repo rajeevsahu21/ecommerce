@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { nodeCache } from "../app.js";
 
 const auth = async (req, res, next) => {
   if (req.user) return next();
@@ -18,7 +19,13 @@ const auth = async (req, res, next) => {
       token,
       process.env.ACCESS_TOKEN_PRIVATE_KEY
     );
-    const currentUser = await User.findOne({
+    let currentUser;
+    currentUser = nodeCache.get("user");
+    if (currentUser) {
+      req.user = currentUser;
+      return next();
+    }
+    currentUser = await User.findOne({
       _id: tokenDetails._id,
       deletedAt: { $exists: false },
     });
@@ -28,6 +35,7 @@ const auth = async (req, res, next) => {
         description: "The user belonging to this token does no longer exist.",
       });
     }
+    nodeCache.set("user", currentUser, 3600);
     req.user = currentUser;
     next();
   } catch (err) {

@@ -1,5 +1,7 @@
 import sendEmail from "../utils/sendEmail.js";
 import { generateOTP } from "./auth.js";
+import { nodeCache } from "../app.js";
+import User from "../models/User.js";
 
 const getUser = async (req, res) => {
   try {
@@ -19,7 +21,8 @@ const updateUser = async (req, res) => {
     const { name } = req.body;
     const user = req.user;
     user.name = name;
-    user.save();
+    await user.save();
+    nodeCache.set("user", user, 3600);
     res.status(200).json({
       status: "success",
       message: "User updated successfully",
@@ -36,7 +39,10 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { verification_code: otp } = req.query;
-    const user = req.user;
+    const user = await User.findOne({
+      _id: req.user._id,
+      deletedAt: { $exists: false },
+    });
     if (!otp) {
       const otp = generateOTP(6);
       user.confirmationCode = otp;
@@ -67,6 +73,7 @@ const deleteUser = async (req, res) => {
     user.confirmationCode = null;
     user.confirmationExpires = null;
     user.save();
+    nodeCache.take("user");
     res.status(200).json({ status: "success", message: "User deleted" });
   } catch (err) {
     console.error(err);
