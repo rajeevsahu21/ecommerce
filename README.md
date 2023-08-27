@@ -1,4 +1,4 @@
-# Halonix One Backend
+# E Commerce Project
 
 ## 📝 Table of Contents
 
@@ -9,7 +9,7 @@
 
 ## 🧐 About <a name = "about"></a>
 
-This is a API's for Ecommerce Project
+This API's for an e-commerce project
 
 ## Getting Started <a name = "getting_started"></a>
 
