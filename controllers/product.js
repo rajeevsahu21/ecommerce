@@ -66,7 +66,7 @@ const getProduct = async (req, res) => {
       return res.status(200).json(JSON.parse(cacheResults));
     }
     const product = await Product.findOne({ _id: id });
-    nodeCache.set(cacheKey, product, 3600);
+    nodeCache.set(cacheKey, JSON.stringify(product), 3600);
     if (!product)
       return res
         .status(404)
